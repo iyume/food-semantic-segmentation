@@ -1,8 +1,8 @@
 from __future__ import annotations
 
 import random
-from typing import Iterable, NamedTuple
 from pathlib import Path
+from typing import Iterable, NamedTuple
 
 import cv2
 import numpy as np
@@ -108,16 +108,22 @@ def get_tables_data() -> Iterable[tuple[np.ndarray, TableConfig]]:
 
 
 def resize_flexible_width(img: np.ndarray, height: int) -> np.ndarray:
+    assert img.ndim == 2 or img.ndim == 3
     # if abs(img.shape[0] - img.shape[1]) / min(img.shape[:2]) >= 0.15:
     #     ...
     width = int(height * (img.shape[1] / img.shape[0]))
     return cv2.resize(img, (width, height))
 
 
+def compress_batch(imgs: np.ndarray, height: int) -> np.ndarray:
+    assert imgs.ndim == 4 or imgs.ndim == 3
+    return np.stack([resize_flexible_width(i, height) for i in imgs])
+
+
 def get_dataset(datanum: int = 20) -> tuple[np.ndarray, np.ndarray]:
     foods = list(get_foods_data())
     tables = list(get_tables_data())
-    res_images = []
+    res_tables = []
     res_labels = []
     for _ in range(datanum):
         table, (_, food_size, anchors) = random.choice(tables)
@@ -128,9 +134,9 @@ def get_dataset(datanum: int = 20) -> tuple[np.ndarray, np.ndarray]:
             table, label = paste_image_on_alpha(table, food_img, anchor, food_class)
             labels.append(label)
         label = np.stack(labels).max(0)
-        res_images.append(table)
+        res_tables.append(table)
         res_labels.append(label)
-    return np.stack(res_images), np.stack(res_labels)
+    return np.stack(res_tables), np.stack(res_labels)
 
 
 def save_dataset(
@@ -160,5 +166,7 @@ def save_dataset(
 
 
 if __name__ == "__main__":
-    imgs, labels = get_dataset()
-    save_dataset(imgs, labels)
+    imgs, labels = get_dataset(400)
+    imgs = compress_batch(imgs, 300)
+    labels = compress_batch(labels, 300)
+    save_dataset(imgs, labels, "dataset-compressed")
