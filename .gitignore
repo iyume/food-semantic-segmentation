@@ -189,11 +189,9 @@ poetry.toml
 
 # End of https://www.toptal.com/developers/gitignore/api/python,visualstudiocode
 
-/dataset*
+/dataset-*
 /foods
 /tables
-/UI/backend/models/*
-!/UI/backend/models/unet.py
 output*
 .vscode
 /pretrained

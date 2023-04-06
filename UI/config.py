@@ -1,8 +1,13 @@
-class Config:
-    assets_dir = "UI/assets"
+from typing import Union
 
-    device: str = "/dev/video10"
-    """The default device on NanoPC-T4."""
+
+class Config:
+    assets_dir: str = "UI/assets"
+
+    device: Union[str, int] = "timer-5min.mp4"
+    """Argument for `cv2.VideoCapture`."""
+
+    evaluate_interval: float = 10
 
 
 config = Config()

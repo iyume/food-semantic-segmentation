@@ -1,16 +1,18 @@
+# scripts that should be run through `python scripts/evaluate.py`
 import cv2
 import numpy as np
 import torch
 from torchvision import transforms
 
-from config import config
-from dataset_generator import id2color
-
+from .dataset_generator import id2color
 from .models.unet import UNet
 
+evalute_weight = "pretrained/model_epoch10.pth"
+device = torch.device("cpu")
+
 net = UNet(3, 12)
-net.to(config.device)
-net.load_state_dict(torch.load("pretrained/model_ep112.pth", config.device))
+net.to(device)
+net.load_state_dict(torch.load("pretrained/model_ep112.pth", device))
 net.eval()
 
 _transform = transforms.Compose([transforms.ToTensor()])
