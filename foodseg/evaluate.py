@@ -1,4 +1,5 @@
-# scripts that should be run through `python scripts/evaluate.py`
+# scripts that should be run through `python -m foodseg.evaluate`
+import click
 import cv2
 import numpy as np
 import torch
@@ -6,13 +7,12 @@ from torchvision import transforms
 
 from .dataset_generator import id2color
 from .models.unet import UNet
+from .utils import classes
 
-evalute_weight = "pretrained/model_epoch10.pth"
 device = torch.device("cpu")
 
-net = UNet(3, 12)
+net = UNet(3, len(classes))
 net.to(device)
-net.load_state_dict(torch.load("pretrained/model_ep112.pth", device))
 net.eval()
 
 _transform = transforms.Compose([transforms.ToTensor()])
@@ -39,11 +39,15 @@ def evaluate(cv_img: np.ndarray) -> np.ndarray:
     return out_vis
 
 
-def test():
-    testimg = cv2.imread("dataset-compressed/images/1.png")
-    out_vis = evaluate(testimg)
-    cv2.imwrite("output.png", out_vis)
+@click.command()
+@click.argument("image", type=click.Path(exists=True, dir_okay=False))
+@click.option("-p", "--pth-file", type=click.Path(exists=True, dir_okay=False))
+@click.option("-o", "--output", default="output.png", type=click.STRING)
+def cli(image: str, pth_file: str, output: str):
+    net.load_state_dict(torch.load(pth_file, device)["model_state_dict"])
+    out = evaluate(cv2.imread(image))
+    cv2.imwrite(output, out)
 
 
 if __name__ == "__main__":
-    test()
+    cli()

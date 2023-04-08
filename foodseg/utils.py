@@ -1,4 +1,4 @@
-from typing import Any, Dict, TypedDict
+from typing import Any, Dict, OrderedDict, TypedDict
 
 import torch
 
@@ -7,9 +7,9 @@ class State(TypedDict):
     """The training state."""
 
     epoch: int
-    model_state_dict: Dict[str, torch.Tensor]
+    model_state_dict: OrderedDict[str, torch.Tensor]
     optim_state_dict: Dict[str, Any]
-    loss: torch.Tensor
+    loss: float
 
 
 id2color = {
@@ -42,3 +42,4 @@ classes = {
     "西红柿鸡蛋": 11,
     "盘子": 12,
 }
+assert len(id2color) == len(classes)

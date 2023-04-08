@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import os
 import random
+import click
 from pathlib import Path
 from typing import Iterable, NamedTuple
 
@@ -189,8 +190,20 @@ def translate_label(label: np.ndarray) -> np.ndarray:
     return label_vis
 
 
-if __name__ == "__main__":
-    imgs, labels = get_dataset(20)
+@click.command()
+@click.option("-n", "--number", type=click.INT)
+@click.option(
+    "-o", "--output-dir", default="dataset-compressed", type=click.Path(file_okay=False)
+)
+def main(number: int, output_dir: str):
+    print("generating dataset...")
+    imgs, labels = get_dataset(number)
+    print("resizing...")
     imgs = compress_to_height_batch(imgs, 300)
     labels = compress_to_height_batch(labels, 300)
-    save_dataset(imgs, labels, "dataset-compressed")
+    print(f"saved at {output_dir}")
+    save_dataset(imgs, labels, output_dir)
+
+
+if __name__ == "__main__":
+    main()
