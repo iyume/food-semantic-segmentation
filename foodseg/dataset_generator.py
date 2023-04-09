@@ -2,10 +2,10 @@ from __future__ import annotations
 
 import os
 import random
-import click
 from pathlib import Path
 from typing import Iterable, NamedTuple
 
+import click
 import cv2
 import numpy as np
 
