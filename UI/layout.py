@@ -1,3 +1,4 @@
+import time
 from contextlib import redirect_stdout
 from typing import Callable, Union, cast
 
@@ -48,7 +49,10 @@ class VideoThread(QThread):
     def run(self) -> None:
         # NOTE: QThread can't be debugged, so add test code
         self.stopped = False
+        fps: float = self.capture.get(cv2.CAP_PROP_FPS)
+        assert fps
         while True:
+            time.sleep(1 / fps)
             if self.stopped:
                 print(f"camera {self.device} stopped")
                 return

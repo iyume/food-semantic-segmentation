@@ -1,6 +1,7 @@
+from typing import Optional
+
 import torch
 from torch import nn
-from typing import Optional
 
 
 class DoubleConv(nn.Sequential):

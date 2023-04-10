@@ -1,4 +1,4 @@
-from typing import Any, Dict, OrderedDict, TypedDict, List
+from typing import Any, Dict, List, OrderedDict, TypedDict
 
 import torch
 
