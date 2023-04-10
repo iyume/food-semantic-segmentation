@@ -44,6 +44,9 @@ class Trainer:
             state = cast(State, torch.load(pth_file, self.device))
             self.model.load_state_dict(state["model_state_dict"])
             self.optimizer.load_state_dict(state["optim_state_dict"])
+            # get parameters view
+            state["model_state_dict"] = self.model.state_dict()
+            state["optim_state_dict"] = self.optimizer.state_dict()
         self.state = state
 
     def train_one(self, create_checkpoint: bool = True):
