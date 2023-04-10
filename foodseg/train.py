@@ -39,6 +39,7 @@ class Trainer:
                 model_state_dict=self.model.state_dict(),
                 optim_state_dict=self.optimizer.state_dict(),
                 loss=0,
+                all_losses=[],
             )
         else:
             state = cast(State, torch.load(pth_file, self.device))
@@ -62,7 +63,9 @@ class Trainer:
             self.optimizer.step()
             print("iter: {}  loss: {:.4f}".format(idx, loss))
         self.state["epoch"] += 1
-        self.state["loss"] = sum(loss_history) / len(loss_history)
+        loss_avg = sum(loss_history) / len(loss_history)
+        self.state["loss"] = loss_avg
+        self.state["all_losses"].append(loss_avg)
         print(f"epoch {self.state['epoch']} training complete")
         print(f"STAT LOSS: {self.state['loss']:.4f}")
         if create_checkpoint:

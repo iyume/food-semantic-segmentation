@@ -1,4 +1,4 @@
-from typing import Any, Dict, OrderedDict, TypedDict
+from typing import Any, Dict, OrderedDict, TypedDict, List
 
 import torch
 
@@ -10,6 +10,7 @@ class State(TypedDict):
     model_state_dict: OrderedDict[str, torch.Tensor]
     optim_state_dict: Dict[str, Any]
     loss: float
+    all_losses: List[float]
 
 
 id2color = {
