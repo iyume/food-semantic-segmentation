@@ -13,7 +13,7 @@ from .utils import State, classes
 
 dataset = GeneratedDataset(dataset_dir="dataset-compressed")
 
-ckpt_dir = Path(".ckpt")
+ckpt_dir = Path("ckpt")
 ckpt_dir.mkdir(exist_ok=True)
 
 
