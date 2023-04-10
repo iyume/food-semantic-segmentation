@@ -61,6 +61,7 @@ class Trainer:
         self.state["epoch"] += 1
         self.state["loss"] = sum(loss_history) / len(loss_history)
         print(f"epoch {self.state['epoch']} training complete")
+        print(f"STAT LOSS: {self.state['loss']:.4f}")
         if create_checkpoint:
             checkpoint = ckpt_dir / f"model_epoch{self.state['epoch']}.pth"
             torch.save(self.state, checkpoint)
