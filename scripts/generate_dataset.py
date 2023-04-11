@@ -2,6 +2,8 @@ from __future__ import annotations
 
 import os
 import random
+import shutil
+import sys
 from pathlib import Path
 from typing import Iterable, NamedTuple
 
@@ -9,7 +11,17 @@ import click
 import cv2
 import numpy as np
 
-from .utils import classes, id2color
+try:
+    import foodseg as _
+except ImportError:
+    print("project is not installed")
+    _parent_path = str(Path(__file__).parent.parent)
+    sys.path.append(_parent_path)
+    import foodseg as _
+
+    sys.path.remove(_parent_path)
+
+from foodseg.utils import classes, id2color
 
 
 class TableConfig(NamedTuple):
@@ -201,6 +213,9 @@ def main(number: int, output_dir: str):
     print("resizing...")
     imgs = compress_to_height_batch(imgs, 300)
     labels = compress_to_height_batch(labels, 300)
+    if Path(output_dir).is_dir():
+        print(f"cleaning {output_dir}")
+        shutil.rmtree(output_dir)
     print(f"saved at {output_dir}")
     save_dataset(imgs, labels, output_dir)
 

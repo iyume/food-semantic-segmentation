@@ -5,9 +5,8 @@ import numpy as np
 import torch
 from torchvision import transforms
 
-from .dataset_generator import id2color
 from .models.unet import UNet
-from .utils import classes
+from .utils import classes, id2color
 
 device = torch.device("cpu")
 
