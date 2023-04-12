@@ -19,3 +19,16 @@ foodseg-evaluate = "foodseg.evaluate:cli"
 [tool.isort]
 profile = "black"
 skip_gitignore = true
+
+[tool.setuptools]
+packages = ["foodseg"]
+
+[tool.setuptools.package-data]
+"*" = ["py.typed"]
+
+[build-system]
+requires = ["setuptools", "setuptools-scm"]
+build-backend = "setuptools.build_meta"
+
+# note: this file is used to manage dependencies but not distributions
+# but for convenience (scripts), the project can install by `pip install -e .`
