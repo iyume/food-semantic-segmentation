@@ -1,13 +1,15 @@
 from typing import Union
 
+assets_dir: str = "UI/assets"
 
-class Config:
-    assets_dir: str = "UI/assets"
+capture_target: Union[str, int] = "video.mp4"
+"""Argument for `cv2.VideoCapture`."""
 
-    device: Union[str, int] = "timer-5min.mp4"
-    """Argument for `cv2.VideoCapture`."""
+evaluate_interval: float = 10
+"""Evaluation cooldown interval."""
 
-    evaluate_interval: float = 10
+pth_file: str = "pretrained/model_epoch530.pth"
+"""Model pth file."""
 
-
-config = Config()
+evaluate_device: str = "cpu"
+"""Model evaluation device."""

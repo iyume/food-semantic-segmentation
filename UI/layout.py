@@ -16,7 +16,7 @@ from PyQt5.QtWidgets import (
     QWidget,
 )
 
-from .config import config
+from . import config
 from .utils import CooldownReject, array2QImage, evaluate, get_asset, min_size
 
 
@@ -103,7 +103,7 @@ class View(QWidget):
         super().__init__()
         self.started = False
 
-        self.camera_device = config.device
+        self.camera_device = config.capture_target
 
         self.setWindowTitle("Real-time Food Recognition")
         self.setWindowIcon(QIcon(get_asset("project-sekai-icon.jpg")))

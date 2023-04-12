@@ -7,7 +7,7 @@ import numpy as np
 from PyQt5.QtCore import QSize
 from PyQt5.QtGui import QImage
 
-from .config import config
+from . import config
 
 _pathnorm = os.path.normpath
 
@@ -60,6 +60,9 @@ def throttle(func: TC, sec: float) -> TC:
     return t.cast(TC, wrapper)
 
 
-from foodseg.evaluate import evaluate as evaluate
+from foodseg.evaluate import Evaluator
 
-evaluate = throttle(evaluate, config.evaluate_interval)
+evaluate = throttle(
+    Evaluator(pth_file=config.pth_file, device=config.evaluate_device).evaluate,
+    config.evaluate_interval,
+)
