@@ -5,6 +5,7 @@ import click
 import cv2
 import numpy as np
 import torch
+import time
 
 from .datasets import GeneratedDataset
 from .models.unet import UNet
@@ -24,10 +25,11 @@ class Evaluator:
             state = cast(State, torch.load(pth_file, self.device))
             self.model.load_state_dict(state["model_state_dict"])
 
-    def evaluate(self, cv_img: np.ndarray) -> np.ndarray:
+    def evaluate(self, cv_img: np.ndarray, timeit: bool = False) -> np.ndarray:
         """(BGR) -> BGR."""
         assert cv_img.ndim == 3
         assert cv_img.shape[2] == 3
+        stime = time.time()
         x = transform(cv_img)
         x.unsqueeze_(0)
         out: torch.Tensor = self.model(x)
@@ -38,6 +40,8 @@ class Evaluator:
             out_vis[:, :, 0][out == class_num] = color[2]  # b channel
             out_vis[:, :, 1][out == class_num] = color[1]  # g channel
             out_vis[:, :, 2][out == class_num] = color[0]  # r channel
+        if timeit:
+            print(f"evaluation time: {time.time() - stime:.6f}s")
         return out_vis
 
 
@@ -45,9 +49,10 @@ class Evaluator:
 @click.argument("imgfile", type=click.Path(exists=True, dir_okay=False))
 @click.option("-p", "--pth-file", type=click.Path(exists=True, dir_okay=False))
 @click.option("-o", "--output", default="output.png", type=click.STRING)
-def cli(imgfile: str, pth_file: str, output: str):
+@click.option("--verbose", is_flag=True)
+def cli(imgfile: str, pth_file: str, output: str, verbose: bool):
     evaluator = Evaluator(pth_file=pth_file)
-    out = evaluator.evaluate(cv2.imread(imgfile))
+    out = evaluator.evaluate(cv2.imread(imgfile), verbose)
     cv2.imwrite(output, out)
 
 
