@@ -69,7 +69,9 @@ class Trainer:
         print(f"epoch {self.state['epoch']} training complete")
         print(f"STAT LOSS: {self.state['loss']:.4f}")
         if create_checkpoint:
-            checkpoint = ckpt_dir / f"model_epoch{self.state['epoch']}.pth"
+            checkpoint = (
+                ckpt_dir / f"model_{self.model.version}_epoch{self.state['epoch']}.pth"
+            )
             torch.save(self.state, checkpoint)
             print(f"model saved at {checkpoint}")
 

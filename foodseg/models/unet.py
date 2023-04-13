@@ -39,14 +39,16 @@ class Up(nn.Sequential):
 
 
 class UNet(nn.Module):
+    version = "v1.0"
+
     def __init__(self, in_channels: int, n_classes: int) -> None:
         super().__init__()
-        self.inc = DoubleConv(in_channels, 16)
-        self.down1 = Down(16, 32)
-        self.down2 = Down(32, 64)
-        self.up1 = Up(64, 32)
-        self.up2 = Up(32, 16)
-        self.outc = DoubleConv(16, n_classes)
+        self.inc = DoubleConv(in_channels, 32)
+        self.down1 = Down(32, 64)
+        self.down2 = Down(64, 128)
+        self.up1 = Up(128, 64)
+        self.up2 = Up(64, 32)
+        self.outc = DoubleConv(32, n_classes)
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         x = self.inc(x)
