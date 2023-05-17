@@ -25,23 +25,27 @@ class Evaluator:
             state = cast(State, torch.load(pth_file, self.device))
             self.model.load_state_dict(state["model_state_dict"])
 
-    def evaluate(self, cv_img: np.ndarray, timeit: bool = False) -> np.ndarray:
-        """(BGR) -> BGR."""
+    def evaluate(
+        self, cv_img: np.ndarray, timeit: bool = False, gt_pred: bool = False
+    ) -> np.ndarray:
+        """(BGR) -> BGR. gt_pred=True returns GroundTruth."""
         assert cv_img.ndim == 3
         assert cv_img.shape[2] == 3
         stime = time.time()
         x = transform(cv_img)
         x.unsqueeze_(0)
-        out: torch.Tensor = self.model(x)
+        out = self.model(x)
         out = out.detach().cpu().squeeze().numpy()
-        out = np.argmax(out, 0)
+        out = np.argmax(out, 0).astype(np.uint8)
+        if timeit:
+            print(f"evaluation time: {time.time() - stime:.6f}s")
+        if gt_pred:
+            return out
         out_vis = np.zeros((out.shape[0], out.shape[1], 3), dtype=np.uint8)
         for class_num, color in id2color.items():
             out_vis[:, :, 0][out == class_num] = color[2]  # b channel
             out_vis[:, :, 1][out == class_num] = color[1]  # g channel
             out_vis[:, :, 2][out == class_num] = color[0]  # r channel
-        if timeit:
-            print(f"evaluation time: {time.time() - stime:.6f}s")
         return out_vis
 
 

@@ -17,7 +17,14 @@ from PyQt5.QtWidgets import (
 )
 
 from . import config
-from .utils import CooldownReject, array2QImage, evaluate, get_asset, min_size
+from .utils import (
+    CooldownReject,
+    array2QImage,
+    evaluate,
+    get_asset,
+    min_size,
+    pred_to_output,
+)
 
 
 def alert_info(msg: str) -> Callable[[], int]:
@@ -217,11 +224,17 @@ class View(QWidget):
         self.in_image.setPixmap(pixmap)
         if self.started:
             try:
-                cv_img_colormap = evaluate(cv_img)
+                gt_pred = evaluate(
+                    cv2.resize(cv_img, config.capture_image_size), gt_pred=True
+                )
             except CooldownReject:
                 pass
             else:
-                pixmap = self._cv2pixmap(cv_img_colormap)
+                output = pred_to_output(
+                    cv2.resize(cv_img, config.evalute_output_image_size),
+                    cv2.resize(gt_pred, config.evalute_output_image_size),
+                )
+                pixmap = self._cv2pixmap(output)
                 self.out_image.setPixmap(pixmap)
 
     def _cv2pixmap(self, cv_img: np.ndarray) -> QPixmap:
