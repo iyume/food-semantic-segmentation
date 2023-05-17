@@ -1,11 +1,11 @@
 # scripts that should be run through `python -m foodseg.evaluate`
+import time
 from typing import ClassVar, Optional, cast
 
 import click
 import cv2
 import numpy as np
 import torch
-import time
 
 from .datasets import GeneratedDataset
 from .models.unet import UNet

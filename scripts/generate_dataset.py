@@ -4,6 +4,7 @@ import os
 import random
 import shutil
 import sys
+import warnings
 from pathlib import Path
 from typing import Iterable, NamedTuple
 
@@ -61,7 +62,7 @@ def imread_crop_margin(path: str) -> np.ndarray:
 
 
 def food_loader(
-    components: list[str], labels: list[int]
+    components: list[str], labels: list[int], check_overlap: bool = True
 ) -> tuple[np.ndarray, np.ndarray]:
     """Read, compose boxed food and its label from universal components."""
     assert components and labels and len(components) == len(labels)
@@ -73,10 +74,18 @@ def food_loader(
     bbox = _get_bbox_nonzero(np.maximum.reduce([i[:, :, 3] for i in imgs]))
     bbox_slice = (slice(bbox[0], bbox[1]), slice(bbox[2], bbox[3]))
     food = np.zeros_like(imgs[0])
+    # food2 = np.zeros_like(imgs[0])
     label = np.zeros((imgs[0].shape[0], imgs[0].shape[1]), dtype=np.uint8)
     for i in range(len(components)):
         # apply each component to result
         mask = imgs[i][:, :, 3] != 0
+        # some bug? or caused by resize?
+        # if check_overlap:
+        #     # check if components overlapped
+        #     if not np.all(food[mask] == 0):
+        #         warnings.warn(f"overlap at {components[i]} {np.average(food[mask])}")
+        #         food2[mask] = [0, 0, 0, 255]
+        #         cv2.imwrite("output.png", food2)
         food[mask] = imgs[i][mask]
         label[mask] = labels[i]
     cv2.imwrite("output.png", translate_label(label[bbox_slice]))
