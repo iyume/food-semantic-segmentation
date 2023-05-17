@@ -74,11 +74,11 @@ def food_loader(
     bbox = _get_bbox_nonzero(np.maximum.reduce([i[:, :, 3] for i in imgs]))
     bbox_slice = (slice(bbox[0], bbox[1]), slice(bbox[2], bbox[3]))
     food = np.zeros_like(imgs[0])
-    # food2 = np.zeros_like(imgs[0])
-    label = np.zeros((imgs[0].shape[0], imgs[0].shape[1]), dtype=np.uint8)
+    label = np.zeros(imgs[0].shape[:2], dtype=np.uint8)
     for i in range(len(components)):
         # apply each component to result
         mask = imgs[i][:, :, 3] != 0
+        # mask = mask & (label == 0)  # avoid overlap
         # some bug? or caused by resize?
         # if check_overlap:
         #     # check if components overlapped
@@ -88,7 +88,6 @@ def food_loader(
         #         cv2.imwrite("output.png", food2)
         food[mask] = imgs[i][mask]
         label[mask] = labels[i]
-    cv2.imwrite("output.png", translate_label(label[bbox_slice]))
     return food[bbox_slice], label[bbox_slice]
 
 
@@ -97,7 +96,8 @@ def paste_image_on_alpha(
     widget: np.ndarray,
     widget_label: np.ndarray,
     anchor: tuple[int, int],
-) -> tuple[np.ndarray, np.ndarray]:
+    table_label: np.ndarray,
+) -> np.ndarray:
     """Returns tuple of pasted image and label image."""
     assert source.shape[2] == 3 and widget.shape[2] == 4
     assert widget_label.ndim == 2
@@ -107,13 +107,15 @@ def paste_image_on_alpha(
         and source.shape[1] > widget.shape[1] + anchor[1]
     )
     source = source.copy()
-    label = np.zeros(source.shape[:2], dtype=np.uint8)
+    # label = np.zeros(source.shape[:2], dtype=np.uint8)
     mask = widget[:, :, 3] != 0
     h_s, w_s = anchor
     h_e, w_e = (h_s + widget.shape[0], w_s + widget.shape[1])
     source[h_s:h_e, w_s:w_e][mask] = widget[..., :3][mask]
-    label[h_s:h_e, w_s:w_e][mask] = widget_label[mask]
-    return source, label
+    table_label[h_s:h_e, w_s:w_e] = widget_label  # remove mask to fix overlap
+    # cv2.imwrite("output-label.png", translate_label(widget_label))
+    # cv2.imwrite("output.png", translate_label(table_label))
+    return source
 
 
 def get_foods_data() -> Iterable[tuple[np.ndarray, np.ndarray]]:
@@ -151,7 +153,8 @@ def resize_to_height(img: np.ndarray, height: int) -> np.ndarray:
     # if abs(img.shape[0] - img.shape[1]) / min(img.shape[:2]) >= 0.15:
     #     ...
     width = int(height * (img.shape[1] / img.shape[0]))
-    return cv2.resize(img, (width, height))
+    # NOTE: we MUST use INTER_NEAREST to not change the label broder
+    return cv2.resize(img, (width, height), interpolation=cv2.INTER_NEAREST)
 
 
 def compress_to_height_batch(imgs: np.ndarray, height: int) -> np.ndarray:
@@ -166,14 +169,12 @@ def get_dataset(datanum: int = 20) -> tuple[np.ndarray, np.ndarray]:
     res_labels = []
     for _ in range(datanum):
         table, (_, food_size, anchors) = random.choice(tables)
-        labels = []
+        label = np.zeros(table.shape[:2], dtype=np.uint8)
         for anchor in anchors:
             food_img, food_class = random.choice(foods)
             food_img = resize_to_height(food_img, food_size[0])
             food_class = resize_to_height(food_class, food_size[0])
-            table, label = paste_image_on_alpha(table, food_img, food_class, anchor)
-            labels.append(label)
-        label = np.stack(labels).max(0)
+            table = paste_image_on_alpha(table, food_img, food_class, anchor, label)
         # label = np.maximum.reduce(labels)
         res_tables.append(table)
         res_labels.append(label)
@@ -212,7 +213,7 @@ def translate_label(label: np.ndarray) -> np.ndarray:
 
 
 @click.command()
-@click.option("-n", "--number", type=click.INT)
+@click.option("-n", "--number", default=40, type=click.INT)
 @click.option(
     "-o", "--output-dir", default="dataset-compressed", type=click.Path(file_okay=False)
 )
@@ -220,8 +221,8 @@ def main(number: int, output_dir: str):
     print("generating dataset...")
     imgs, labels = get_dataset(number)
     print("resizing...")
-    imgs = compress_to_height_batch(imgs, 300)
-    labels = compress_to_height_batch(labels, 300)
+    imgs = compress_to_height_batch(imgs, 600)
+    labels = compress_to_height_batch(labels, 600)
     if Path(output_dir).is_dir():
         print(f"cleaning {output_dir}")
         shutil.rmtree(output_dir)
