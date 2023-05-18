@@ -14,7 +14,7 @@ evalute_output_image_size: Tuple[int, int] = (1080, 720)
 evaluate_interval: float = 3
 """Evaluation cooldown interval."""
 
-pth_file: str = "pretrained/model_v1.0_epoch350.pth"
+pth_file: str = "pretrained/model_v1.0_epoch110.pth"
 """Model pth file."""
 
 evaluate_device: str = "cpu"

@@ -222,14 +222,27 @@ class View(QWidget):
         if self.started:
             try:
                 gt_pred = evaluate(
-                    cv2.resize(cv_img, config.capture_image_size), gt_pred=True
+                    cv2.resize(
+                        cv_img,
+                        config.capture_image_size,
+                        interpolation=cv2.INTER_NEAREST,
+                    ),
+                    gt_pred=True,
                 )
             except CooldownReject:
                 pass
             else:
                 output = pred_to_output(
-                    cv2.resize(cv_img, config.evalute_output_image_size),
-                    cv2.resize(gt_pred, config.evalute_output_image_size),
+                    cv2.resize(
+                        cv_img,
+                        config.evalute_output_image_size,
+                        interpolation=cv2.INTER_NEAREST,
+                    ),
+                    cv2.resize(
+                        gt_pred,
+                        config.evalute_output_image_size,
+                        interpolation=cv2.INTER_NEAREST,
+                    ),
                 )
                 pixmap = self._cv2pixmap(output)
                 self.out_image.setPixmap(pixmap)
