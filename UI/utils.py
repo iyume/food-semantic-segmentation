@@ -3,11 +3,10 @@ import time
 import typing as t
 from functools import wraps
 
+import cv2
 import numpy as np
 from PyQt5.QtCore import QSize
 from PyQt5.QtGui import QImage
-
-from foodseg.utils import classes
 
 from . import config
 
@@ -43,6 +42,11 @@ def pred_to_output(source: np.ndarray, gt_pred: np.ndarray) -> np.ndarray:
     # output_mask = (gt_pred != classes["背景"]) & (gt_pred != classes["盘子"])
     output_mask = np.any([gt_pred == c for c in range(1, 12)], axis=0)
     output[output_mask] = source[output_mask]
+    output = cv2.cvtColor(output, cv2.COLOR_BGR2HSV).astype(np.uint8)
+    output[:, :, 1] = np.clip(output[:, :, 1] + 20, 0, 255)
+    output[:, :, 2] = np.clip(output[:, :, 2] + 20, 0, 255)
+    output = cv2.cvtColor(output, cv2.COLOR_HSV2BGR)
+    output = cv2.GaussianBlur(output, (23, 23), 8, borderType=cv2.BORDER_CONSTANT)
     return output
 
 

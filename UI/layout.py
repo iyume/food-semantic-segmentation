@@ -202,9 +202,6 @@ class View(QWidget):
 
     def handle_stop(self) -> None:
         self.started = False
-        View.min_image_size = QSize(
-            View.min_image_size.height() + 200, View.min_image_size.height() + 200
-        )
         self.setup_default_image()
 
     def handle_fullscreen(self) -> None:
